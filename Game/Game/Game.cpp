@@ -145,7 +145,7 @@ int main()
 	map.loadFromImage(map_image);//заряжаем текстуру картинкой
 	Sprite s_map;//создаём спрайт для карты
 	s_map.setTexture(map);//заливаем текстуру спрайтом
-
+	randomStoneMapGenerate();
 	while (window.isOpen())
 	{
 		sf::Event event;
@@ -159,22 +159,22 @@ int main()
 				{
 					switch (showMissionText)
 					{//переключатель, реагирующий на логическую переменную showMissionText
-					case true:
-					{	
-						text.setString("Здоровье:" + std::to_string(hero.health) + "\n" + getTextMission(getCurrentMission(hero.getplayercoordinateX())));//задаем строку тексту и вызываем сформированную выше строку методом .str() 
-						text.setPosition(view.getCenter().x - 165, view.getCenter().y - 200);//задаем позицию текста, отступая от центра камеры
+						case true:
+						{	
+							text.setString("Здоровье:" + std::to_string(hero.health) + "\n" + getTextMission(getCurrentMission(hero.getplayercoordinateX())));//задаем строку тексту и вызываем сформированную выше строку методом .str() 
+							text.setPosition(view.getCenter().x - 165, view.getCenter().y - 200);//задаем позицию текста, отступая от центра камеры
 						s_quest.setPosition(view.getCenter().x + 115, view.getCenter().y - 130);//позиция фона для блока
-						showMissionText = false;//эта строка позволяет убрать все что мы вывели на экране
-						break;//выходим , чтобы не выполнить условие "false" (которое ниже)
-					}
-					case false:
-					{
-						text.setString("");//если не нажата клавиша таб, то весь этот текст пустой
-						showMissionText = true;// а эта строка позволяет снова нажать клавишу таб и получить вывод на экран
-						break;
+							showMissionText = false;//эта строка позволяет убрать все что мы вывели на экране
+							break;//выходим , чтобы не выполнить условие "false" (которое ниже)
+						}
+						case false:
+						{
+							text.setString("");//если не нажата клавиша таб, то весь этот текст пустой
+							showMissionText = true;// а эта строка позволяет снова нажать клавишу таб и получить вывод на экран
+							break;
+						}
 					}
 				}
-			}
 		}
 		if (hero.life)
 		{
@@ -221,7 +221,6 @@ int main()
 				if (TileMap[i][j] == ' ')  s_map.setTextureRect(IntRect(0, 0, 32, 32));
 				if (TileMap[i][j] == 's')  s_map.setTextureRect(IntRect(32, 0, 32, 32));
 				if ((TileMap[i][j] == 'b')) s_map.setTextureRect(IntRect(64, 0, 32, 32));
-				if ((TileMap[i][j] == 'f')) s_map.setTextureRect(IntRect(96, 0, 32, 32));//добавили цветок
 				if ((TileMap[i][j] == 'h')) s_map.setTextureRect(IntRect(128, 0, 32, 32));//и сердечко
 				s_map.setPosition(j * 32, i * 32);
 				window.draw(s_map);//рисуем квадратики на экран
