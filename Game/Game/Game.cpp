@@ -4,6 +4,8 @@
 #include "View.h"
 #include <sstream>
 #include <string>
+#include "mission.h"
+#include <iostream>
 
 using namespace sf;
 class Player
@@ -119,8 +121,19 @@ int main()
 	Font font;//шрифт 
 	font.loadFromFile("resources/CyrilicOld.ttf");//передаем нашему шрифту файл шрифта
 	Text text("", font, 20);//создаем объект текст. закидываем в объект текст строку, шрифт, размер шрифта(в пикселях);//сам объект текст (не строка)
-	text.setFillColor(Color::Red);//покрасили текст в красный. если убрать эту строку, то по умолчанию он белый
-	text.setStyle(sf::Text::Bold | sf::Text::Underlined);//жирный и подчеркнутый текст. по умолчанию он "худой":)) и не подчеркнутый
+	text.setFillColor(Color::Black);//покрасили текст в красный. если убрать эту строку, то по умолчанию он белый
+
+	bool showMissionText = true;//логическая переменная, отвечающая за появление текста миссии на экране
+	Image quest_image;
+	quest_image.loadFromFile("images/missionbg.jpg");
+	quest_image.createMaskFromColor(Color(0, 0, 0));
+	Texture quest_texture;
+	quest_texture.loadFromImage(quest_image);
+	Sprite s_quest;
+	s_quest.setTexture(quest_texture);
+	s_quest.setTextureRect(IntRect(0, 0, 340, 510));  //приведение типов, размеры картинки исходные
+	s_quest.setScale(0.6f, 0.6f);//чуть уменьшили картинку, => размер стал меньше
+
 
 	float CurrentFrame = 0;//хранит текущий кадр
 
@@ -140,37 +153,61 @@ int main()
 		{
 			if (event.type == sf::Event::Closed)
 				window.close();
+
+			if (event.type == Event::KeyPressed)//событие нажатия клавиши
+				if ((event.key.code == Keyboard::Tab))
+				{
+					switch (showMissionText)
+					{//переключатель, реагирующий на логическую переменную showMissionText
+					case true:
+					{	
+						text.setString("Здоровье:" + std::to_string(hero.health) + "\n" + getTextMission(getCurrentMission(hero.getplayercoordinateX())));//задаем строку тексту и вызываем сформированную выше строку методом .str() 
+						text.setPosition(view.getCenter().x - 165, view.getCenter().y - 200);//задаем позицию текста, отступая от центра камеры
+						s_quest.setPosition(view.getCenter().x + 115, view.getCenter().y - 130);//позиция фона для блока
+						showMissionText = false;//эта строка позволяет убрать все что мы вывели на экране
+						break;//выходим , чтобы не выполнить условие "false" (которое ниже)
+					}
+					case false:
+					{
+						text.setString("");//если не нажата клавиша таб, то весь этот текст пустой
+						showMissionText = true;// а эта строка позволяет снова нажать клавишу таб и получить вывод на экран
+						break;
+					}
+				}
+			}
 		}
 		if (hero.life)
 		{
-			if (Keyboard::isKeyPressed(Keyboard::Left)) {
+			if (Keyboard::isKeyPressed(Keyboard::Left)) 
+			{
 				hero.dir = 1; hero.speed = 1.f;
 				CurrentFrame += 0.025*time;
 				if (CurrentFrame > 3) CurrentFrame -= 3;
 				hero.sprite.setTextureRect(IntRect(96 * int(CurrentFrame), 96, 96, 96));
-
 			}
 
-			if (Keyboard::isKeyPressed(Keyboard::Right)) {
+			if (Keyboard::isKeyPressed(Keyboard::Right))
+			{
 				hero.dir = 0; hero.speed = 1.f;
 				CurrentFrame += 0.025*time;
 				if (CurrentFrame > 3) CurrentFrame -= 3;
 				hero.sprite.setTextureRect(IntRect(96 * int(CurrentFrame), 192, 96, 96));
 			}
 
-			if (Keyboard::isKeyPressed(Keyboard::Up)) {
+			if (Keyboard::isKeyPressed(Keyboard::Up)) 
+			{
 				hero.dir = 3; hero.speed = 1.f;
 				CurrentFrame += 0.025*time;
 				if (CurrentFrame > 3) CurrentFrame -= 3;
 				hero.sprite.setTextureRect(IntRect(96 * int(CurrentFrame), 307, 96, 96));// 
 			}
 
-			if (Keyboard::isKeyPressed(Keyboard::Down)) {
+			if (Keyboard::isKeyPressed(Keyboard::Down)) 
+			{
 				hero.dir = 2; hero.speed = 1.f;
 				CurrentFrame += 0.025*time;
 				if (CurrentFrame > 3) CurrentFrame -= 3;
 				hero.sprite.setTextureRect(IntRect(96 * int(CurrentFrame), 0, 96, 96));
-
 			}
 		}
 		getplayercoordinateforview(hero.getplayercoordinateX(), hero.getplayercoordinateY());
@@ -189,9 +226,16 @@ int main()
 				s_map.setPosition(j * 32, i * 32);
 				window.draw(s_map);//рисуем квадратики на экран
 			}
-		text.setString("Здоровье:" + std::to_string(hero.health));//задаем строку тексту и вызываем сформированную выше строку методом .str() 
-		text.setPosition(view.getCenter().x - 165, view.getCenter().y - 200);//задаем позицию текста, отступая от центра камеры
+		if (!showMissionText)
+		{ 
+			text.setPosition(view.getCenter().x + 125, view.getCenter().y - 130);//позиция всего этого текстового блока
+			s_quest.setPosition(view.getCenter().x + 115, view.getCenter().y - 130);//позиция фона для блока			
+			window.draw(s_quest);
+			window.draw(text); //рисуем спрайт свитка (фон для текста миссии). а затем и текст. все это завязано на логическую переменную, которая меняет свое состояние от нажатия клавиши ТАБ
+		}
+		
 		window.draw(hero.sprite);
+		
 		if (!hero.life)
 		{
 			text.setString("Игра окончена\n Ваши очки: " + std::to_string(hero.playerScore));//задаем строку тексту и вызываем сформированную выше строку методом .str() 
